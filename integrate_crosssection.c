@@ -1,9 +1,11 @@
 // 
 //  compile with "gcc -c integrate_crosssection.c"
-//  link    with "gcc gcc -lm integrate_crosssection.o nvegas.o genps.o -o Integrate"
+//  link    with "gcc -lm integrate_crosssection.o nvegas.o genps.o -o Integrate"
 //  execute ./Integrate
 // 
 // to link MG use: "icc integrate_crosssection.o nvegas.o genps.o emep_taptam.o MGWrapper.a -lifcore -limf -o Integrate"
+// 
+// to link PDFs use: "gcc integrate_crosssection.c -lm nvegas.o genps.o ./PDFs/mstwpdf.o ./PDFs/alphaS.o -lgfortran -o Integrate"
 
 
 #include <math.h>
@@ -75,8 +77,37 @@ void TestCrossSection(double x[DIMENSION], double f[FUNCTIONS])
   pIn[1][1] = 0.0;
   pIn[1][2] = 0.0;
   pIn[1][3] =-CMSEnergy/2.0;
-    
+  
+  
+  
+//------- calling pdf -----------------------------  
+  
+  char path[] = "mstw2008lo.00.dat";
+  int iParton;
+  int iSet;
+  double x1,q,pdf_u;
+  
+// initializing  
+  q = 500.0;
+  iSet=0;
 
+// momentum fraction x1
+  x1 = 0.000123;
+  
+// iParton =   -6,  -5,  -4,  -3,  -2,  -1,0,1,2,3,4,5,6
+//         = tbar,bbar,cbar,sbar,ubar,dbar,g,d,u,s,c,b,t.
+  iParton = 3;  // selecting a strange quark
+  
+// calling the pdf function
+  getonepdf_(&iSet,&x1,&q,&iParton,&pdf_u);
+
+// printing the result
+  printf("%f %f %f \n",x1,q,pdf_u);
+  
+// -------------------------------------------------  
+  
+  
+  
   // check the generated momenta
    
 //   printf("x : %10.4f %10.4f \n",x[0],x[1]);;
