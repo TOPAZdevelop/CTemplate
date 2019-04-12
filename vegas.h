@@ -1,6 +1,6 @@
 #define ALPH 1.5             /* exponent to compress refinement in range     */
 #define NDMX 100             /* maximum number of bins per dimension         */
-#define MXDIM 25              /* maximum dimension that can be passed by ndim */  /* MARKUS: has to match the one in vegas_common.f !! */
+#define MXDIM 6              /* maximum dimension that can be passed by ndim */
 #define FNMX 10              /* maximum number of integrands                 */
 
 /* 
@@ -21,9 +21,9 @@
 /*
  * prototype for vegas
  */
-void vegas_mpi_(double regn[], int *ndim_in, void (*fxn)(double x[], double *wgt, double f[]),
-           int *init_in, int *ncall_in, int *itmx_in, int *nprn_in,
-           int *fcns_in, int *pdim_in, int *wrks_in,
+void vegas(double regn[], int ndim, void (*fxn)(double x[], double f[]),
+           int init, unsigned long ncall, int itmx, int nprn,
+           int fcns, int pdim, int wrks,
            double tgral[], double sd[], double chi2a[]);
 
 /*
