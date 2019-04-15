@@ -21,7 +21,7 @@
 /*
  * prototype for vegas
  */
-void vegas(double regn[], int ndim, void (*fxn)(double x[], double f[]),
+void vegas(double regn[], int ndim, void (*fxn)(double x[], double *wgt, double f[]),
            int init, unsigned long ncall, int itmx, int nprn,
            int fcns, int pdim, int wrks,
            double tgral[], double sd[], double chi2a[]);

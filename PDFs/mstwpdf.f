@@ -139,7 +139,7 @@ C--   heavy quark masses and alphaS parameters in COMMON block.
          stop
       end if
 
-
+      !print *, "check input",ih,x,q,f ! MARKUS
       prefix="PDFs/mstw2008lo"  !MARKUS
 
 C--   Check if the requested parton set is already in memory.

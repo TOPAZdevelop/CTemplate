@@ -151,7 +151,7 @@ void gfsr_init(long seed)
   gfsr_not_initialized = 0;
 }
 
-void vegas(double regn[], int ndim, void (*fxn)(double x[], double f[]),
+void vegas(double regn[], int ndim, void (*fxn)(double x[], double *wgt, double f[]),
            int init, unsigned long ncall, int itmx, int nprn,
            int fcns, int pdim, int wrks,
            double tgral[], double sd[], double chi2a[])
@@ -295,7 +295,7 @@ void vegas(double regn[], int ndim, void (*fxn)(double x[], double f[]),
           x[j] = regn[j]+rc*dx[j];
           wgt *= xo*xnd;
         }
-        fxn(x,f);   /* call integrand at point x */
+        fxn(x,&wgt,f);   /* call integrand at point x */
         for (j=0; j<functions; j++) {
           if (f[j] != 0.0) ++Ax[j].npg;
           f[j] *= wgt;
