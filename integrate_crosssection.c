@@ -290,10 +290,10 @@ void CrossSection(double x[DIMENSION], double *weight, double f[FUNCTIONS])
  int iBin1= WhichBin(1,pTg);
  int iBin2= WhichBin(2,yg);
  
- Histogram_spin0[0][iBin1] = f[0] * (*weight);
- Histogram_spin1[0][iBin1] = f[1] * (*weight);
- Histogram_spin0[1][iBin2] = f[0] * (*weight);
- Histogram_spin1[1][iBin2] = f[1] * (*weight);
+ Histogram_spin0[0][iBin1] += f[0] * (*weight);
+ Histogram_spin1[0][iBin1] += f[1] * (*weight);
+ Histogram_spin0[1][iBin2] += f[0] * (*weight);
+ Histogram_spin1[1][iBin2] += f[1] * (*weight);
 
 
 //  double MGRes;
@@ -354,7 +354,7 @@ int main(int argc, char **argv)
   }
 
   // setting parameters for vegas integrator
-  unsigned long ncall=1000000;
+  unsigned long ncall=10000000;
 
 
   int init=0;
@@ -376,15 +376,25 @@ int main(int argc, char **argv)
   
 
 
+  double LowVal,BinSize;
+
   for (j=0; j<NUMHIST; j++) {
    for (i=0; i<NUMBINS; i++) { 
-      printf("0  %2i %2i   %e \n",j+1,i+1,Histogram_spin0[j][i]);
+	  switch(j) {
+	    case 0: LowVal=20.0*GeV; BinSize=10*GeV; break;  // pT_glu
+	    case 1: LowVal=-5.0; BinSize=0.5;        break;  // y_glu
+	  };
+      printf("0  %2i  %6.2f   %e \n",j+1,(i)*BinSize+LowVal,Histogram_spin0[j][i]/itmx);
    };
   };
   printf("\n\n");
   for (j=0; j<NUMHIST; j++) {
    for (i=0; i<NUMBINS; i++) { 
-      printf("1  %2i %2i   %e \n",j+1,i+1,Histogram_spin1[j][i]);
+	  switch(j) {
+	    case 0: LowVal=20.0*GeV; BinSize=10*GeV; break;  // pT_glu
+	    case 1: LowVal=-5.0; BinSize=0.5;        break;  // y_glu
+	  };
+      printf("1  %2i  %6.2f   %e \n",j+1,(i)*BinSize+LowVal,Histogram_spin1[j][i]/itmx);
    };
   };
 	
