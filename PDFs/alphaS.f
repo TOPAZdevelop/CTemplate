@@ -81,11 +81,11 @@ C--   Find the zero of this function using DZEROX.
       DOUBLE PRECISION FUNCTION FINDALPHASR0(ASI)
       IMPLICIT NONE
       INTEGER IORD
-      DOUBLE PRECISION FR2, R0, ASI, MC, MB, MT, MUR, ASMUR, ALPHAS
+      DOUBLE PRECISION FR2, R0, ASI, MC,MB,MT,MUR,ASMUR,ALPHAS,RES
       COMMON / DZEROXcommon / FR2, MUR, ASMUR, MC, MB, MT, R0, IORD
 
       CALL INITALPHASR0(IORD, FR2, R0, ASI, MC, MB, MT)
-      FINDALPHASR0 = ALPHAS(MUR) - ASMUR ! solve equal to zero
+      FINDALPHASR0 = ALPHAS(MUR,RES) - ASMUR ! solve equal to zero
 
       RETURN
       END
@@ -129,8 +129,8 @@ C--   Must have R0*sqrt(FR2) <= MC to call this subroutine.
       ZETA(5) = 1.03692 77551 43370 D0
       ZETA(6) = 1.01734 30619 84449 D0
 
-      IVFNS = 1                 ! variable flavour-number scheme (VFNS)
-C      IVFNS = 0                 ! fixed flavour-number scheme (FFNS)
+C      IVFNS = 1                 ! variable flavour-number scheme (VFNS)
+      IVFNS = 0                 ! fixed flavour-number scheme (FFNS)
       NFF = 4                   ! number of flavours for FFNS
       NAORD = IORD              ! perturbative order of alpha_s
       NASTPS = 20               ! num. steps in Runge-Kutta integration
@@ -164,7 +164,7 @@ C      IVFNS = 0                 ! fixed flavour-number scheme (FFNS)
       END IF
 *
       IF ( (IVFNS .EQ. 1) .AND. (M20 .GT. MC2) ) THEN
-         WRITE (6,*) 'Too high mu_0 for VFNS evolution. STOP'
+         WRITE (6,*) 'Too high mu_0 for VFNS evolution. STOP',R0
          STOP
       END IF
 *     
@@ -199,11 +199,11 @@ C--   Store alpha_s at the heavy flavour thresholds in a COMMON block.
 
 C----------------------------------------------------------------------
 
-      DOUBLE PRECISION FUNCTION ALPHAS(MUR)
+      DOUBLE PRECISION FUNCTION ALPHAS(MUR,Res)
       IMPLICIT NONE
       INTEGER NFF,IVFNS,NF
       DOUBLE PRECISION PI,LOGFR,AS0,M20,ASC,M2C,ASB,M2B,AST,M2T,M2,MUR,
-     &     R2,ASI,ASF,R20,R2T,R2B,R2C,AS
+     &     R2,ASI,ASF,R20,R2T,R2B,R2C,AS,RES
       PARAMETER ( PI = 3.1415 92653 58979 D0 )
 *
 * ..Input common blocks 
@@ -260,6 +260,7 @@ C----------------------------------------------------------------------
 * ..Final value of alpha_s
 *
        ALPHAS = 4.D0*PI*ASF
+       RES = ALPHAS
 
        RETURN
        END

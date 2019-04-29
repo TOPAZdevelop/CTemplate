@@ -23,9 +23,13 @@
 #endif
 
 const double Pi=3.14159265359;
-const double alpha_s=0.13; // 0.13938938; //
+      double alpha_s;
 const double alpha=0.00729927007299; // 0.0075624689028; //
 const double GeV=1.0;
+
+const double C_DMspin0=1.0;
+const double C_DMspin1=0.1;
+
 
 #define NUMHIST 2
 #define NUMBINS 20
@@ -51,9 +55,8 @@ double Dot(double *pa,double *pb) // Minkowski dot product
 
 //----------------------------------------------------------------------------------
 
-double ME1sq(double *p1,double *p2,double *p3,double *p4) // spin-1 matrix element squared
+double ME1sq_qqb(double *p1,double *p2,double *p3,double *p4) // spin-1 matrix element squared
 {
- double C_DMspin1=0.1; // sqrt(4.0*Pi*alpha) ; //
  double PreFactor = 8.0*(4.0*Pi*alpha_s)*C_DMspin1*C_DMspin1;
  double MEsq,s,t,u,M2;
  
@@ -70,9 +73,8 @@ double ME1sq(double *p1,double *p2,double *p3,double *p4) // spin-1 matrix eleme
 
 
 
-double ME0sq(double *p1,double *p2,double *p3,double *p4) // spin-0 matrix element squared
+double ME0sq_qqb(double *p1,double *p2,double *p3,double *p4) // spin-0 matrix element squared
 {
- double C_DMspin0=1.0;
  double PreFactor = 4.0*(4.0*Pi*alpha_s)*C_DMspin0*C_DMspin0;
  double MEsq,s,t,u,M2;
  
@@ -86,6 +88,77 @@ double ME0sq(double *p1,double *p2,double *p3,double *p4) // spin-0 matrix eleme
  return MEsq;
  
 }
+
+double ME1sq_gq(double *p1,double *p2,double *p3,double *p4) // spin-1 matrix element squared
+{
+ double PreFactor = 8.0*(4.0*Pi*alpha_s)*C_DMspin1*C_DMspin1;
+ double MEsq,s,t,u,M2;
+ 
+    M2=   Dot(p3,p3);
+    t = 2*Dot(p1,p2);
+    s =-2*Dot(p1,p3)+M2;
+    u =-2*Dot(p2,p3)+M2;
+
+    MEsq = -PreFactor * (2*s*s + t*t + u*u + 2*s*(t+u))/(t*u);
+
+ return MEsq;
+ 
+}
+
+
+
+double ME0sq_gq(double *p1,double *p2,double *p3,double *p4) // spin-0 matrix element squared
+{
+ double PreFactor = 4.0*(4.0*Pi*alpha_s)*C_DMspin0*C_DMspin0;
+ double MEsq,s,t,u,M2;
+ 
+    M2=   Dot(p3,p3);
+    t = 2*Dot(p1,p2);
+    s =-2*Dot(p1,p3)+M2;
+    u =-2*Dot(p2,p3)+M2;
+
+    MEsq = -PreFactor * (s*s + M2*M2)/(t*u);
+
+ return MEsq;
+ 
+}
+
+
+
+double ME1sq_qbg(double *p1,double *p2,double *p3,double *p4) // spin-1 matrix element squared
+{
+ double PreFactor = 8.0*(4.0*Pi*alpha_s)*C_DMspin1*C_DMspin1;
+ double MEsq,s,t,u,M2;
+ 
+    M2=   Dot(p3,p3);
+    u = 2*Dot(p1,p2);
+    t =-2*Dot(p1,p3)+M2;
+    s =-2*Dot(p2,p3)+M2;
+
+    MEsq = -PreFactor * (2*s*s + t*t + u*u + 2*s*(t+u))/(t*u);
+
+ return MEsq;
+ 
+}
+
+
+
+double ME0sq_qbg(double *p1,double *p2,double *p3,double *p4) // spin-0 matrix element squared
+{
+ double PreFactor = 4.0*(4.0*Pi*alpha_s)*C_DMspin0*C_DMspin0;
+ double MEsq,s,t,u,M2;
+ 
+    M2=   Dot(p3,p3);
+    u = 2*Dot(p1,p2);
+    t =-2*Dot(p1,p3)+M2;
+    s =-2*Dot(p2,p3)+M2;
+
+    MEsq = -PreFactor * (s*s + M2*M2)/(t*u);
+
+ return MEsq;
+ 
+}
+
 
 
 int WhichBin(int iBin, double ObsVal)
@@ -120,11 +193,23 @@ void CrossSection(double x[DIMENSION], double *weight, double f[FUNCTIONS])
   int NPart,iSet,iParton;
   double x1,x2,q,Flux,pTg,yg,pTg_cut;
   double Mass[2],pOut[2][4],pIn[2][4];
-  double sigma_spin0_qq,sigmahat_spin0_qq;
-  double sigma_spin1_qq,sigmahat_spin1_qq;
-  double Jacobian,fbGeV2,shat,CMSEnergy,ColliderEnergy,ColAvg_qq;
-  double pdf_u,pdf_d,pdf_c,pdf_s,pdf_b,pdf_g;
-  double pdf_ub,pdf_db,pdf_cb,pdf_sb,pdf_bb;
+  double sigma_spin0_qqb,sigmahat_spin0_qqb;
+  double sigma_spin1_qqb,sigmahat_spin1_qqb;
+  double sigma_spin0_qbq,sigmahat_spin0_qbq;
+  double sigma_spin1_qbq,sigmahat_spin1_qbq;
+  double sigma_spin0_qg,sigmahat_spin0_qg;
+  double sigma_spin1_qg,sigmahat_spin1_qg;
+  double sigma_spin0_qbg,sigmahat_spin0_qbg;
+  double sigma_spin1_qbg,sigmahat_spin1_qbg;
+  double sigma_spin0_gq,sigmahat_spin0_gq;
+  double sigma_spin1_gq,sigmahat_spin1_gq;
+  double sigma_spin0_gqb,sigmahat_spin0_gqb;
+  double sigma_spin1_gqb,sigmahat_spin1_gqb;
+  double Jacobian,shat,CMSEnergy,ColliderEnergy;
+  double pdf1_u,pdf1_d,pdf1_c,pdf1_s,pdf1_b,pdf1_g;
+  double pdf1_ub,pdf1_db,pdf1_cb,pdf1_sb,pdf1_bb;
+  double pdf2_u,pdf2_d,pdf2_c,pdf2_s,pdf2_b,pdf2_g;
+  double pdf2_ub,pdf2_db,pdf2_cb,pdf2_sb,pdf2_bb;
   double vev=1*GeV;
   double mov2_u=((2e-3)*GeV/vev)*((2e-3)*GeV/vev);
   double mov2_d=((5e-3)*GeV/vev)*((5e-3)*GeV/vev);
@@ -134,7 +219,9 @@ void CrossSection(double x[DIMENSION], double *weight, double f[FUNCTIONS])
   double Qu2=(2.0/3.0)*(2.0/3.0);
   double Qd2=(1.0/3.0)*(1.0/3.0);
   const double PiWgt2 = 1.0/Pi;
-
+  const double ColAvg_qq = 1.0/3.0/3.0;
+  const double ColAvg_qg = 1.0/3.0/8.0;
+  const double fbGeV2 = 0.389379*1e12;
 
 //x[0]=0.15;
 //x[1]=0.76;
@@ -155,10 +242,8 @@ void CrossSection(double x[DIMENSION], double *weight, double f[FUNCTIONS])
 
   shat = x1*x2*ColliderEnergy*ColliderEnergy;
   CMSEnergy = sqrt(shat);
-  q = CMSEnergy; // 91.19*GeV;   //
+  q = CMSEnergy; 
   Flux = 1.0/(2.0*shat);
-  ColAvg_qq = 1.0/3.0/3.0;
-  fbGeV2 = 0.389379*1e12;
 
   if ( CMSEnergy < Mass[0]+Mass[1]+pTg_cut ){
     return;
@@ -208,37 +293,96 @@ void CrossSection(double x[DIMENSION], double *weight, double f[FUNCTIONS])
   // P_left( q(x1) ) * P_right( qbar(x2 )
 
   iParton = 0;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf_g);
+  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_g);
   iParton = 1;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf_d);
+  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_d);
   iParton = 2;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf_u);
+  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_u);
   iParton = 3;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf_s);
+  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_s);
   iParton = 4;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf_c);
+  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_c);
   iParton = 5;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf_b);
+  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_b);
 
   iParton = -1;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf_db);
+  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_db);
   iParton = -2;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf_ub);
+  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_ub);
   iParton = -3;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf_sb);
+  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_sb);
   iParton = -4;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf_cb);
+  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_cb);
   iParton = -5;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf_bb);
+  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_bb);    
+  
+  iParton = -1;
+  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_db);
+  iParton = -2;
+  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_ub);
+  iParton = -3;
+  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_sb);
+  iParton = -4;
+  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_cb);
+  iParton = -5;
+  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_bb);
+
+  iParton = 0;
+  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_g);
+  iParton = 1;
+  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_d);
+  iParton = 2;
+  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_u);
+  iParton = 3;
+  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_s);
+  iParton = 4;
+  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_c);
+  iParton = 5;
+  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_b);
+
   Jacobian *=1.0/x1/x2;
 
+  
+  alphas_(&q,&alpha_s);
 
-  sigmahat_spin0_qq = ColAvg_qq * Flux * Jacobian * ME0sq(pIn[0],pIn[1],pOut[0],pOut[1]);
-  sigmahat_spin1_qq = ColAvg_qq * Flux * Jacobian * ME1sq(pIn[0],pIn[1],pOut[0],pOut[1]);
-  sigma_spin0_qq    = sigmahat_spin0_qq* (pdf_u*pdf_ub*mov2_u + pdf_d*pdf_db*mov2_d+ pdf_c*pdf_cb*mov2_c + pdf_s*pdf_sb*mov2_s + pdf_b*pdf_bb*mov2_b);
-  sigma_spin1_qq    = sigmahat_spin1_qq* (pdf_u*pdf_ub + pdf_d*pdf_db + pdf_c*pdf_cb + pdf_s*pdf_sb + pdf_b*pdf_bb);
+  sigmahat_spin0_qqb= ColAvg_qq * Flux * Jacobian * ME0sq_qqb(pIn[0],pIn[1],pOut[0],pOut[1]);
+  sigmahat_spin1_qqb= ColAvg_qq * Flux * Jacobian * ME1sq_qqb(pIn[0],pIn[1],pOut[0],pOut[1]);
+  sigma_spin0_qqb   = sigmahat_spin0_qqb* (pdf1_u*pdf2_ub*mov2_u + pdf1_d*pdf2_db*mov2_d+ pdf1_c*pdf2_cb*mov2_c + pdf1_s*pdf2_sb*mov2_s + pdf1_b*pdf2_bb*mov2_b);
+  sigma_spin1_qqb   = sigmahat_spin1_qqb* (pdf1_u*pdf2_ub + pdf1_d*pdf2_db + pdf1_c*pdf2_cb + pdf1_s*pdf2_sb + pdf1_b*pdf2_bb);
 //  sigma_spin1_qq    = sigmahat_spin1_qq* (pdf_u*pdf_ub*Qu2 + pdf_d*pdf_db*Qd2 + pdf_c*pdf_cb*Qu2 + pdf_s*pdf_sb*Qd2 + pdf_b*pdf_bb*Qd2);
 
+
+  sigmahat_spin0_qbq = ColAvg_qq * Flux * Jacobian * ME0sq_qqb(pIn[1],pIn[0],pOut[0],pOut[1]);
+  sigmahat_spin1_qbq = ColAvg_qq * Flux * Jacobian * ME1sq_qqb(pIn[1],pIn[0],pOut[0],pOut[1]);
+  sigma_spin0_qbq    = sigmahat_spin0_qbq* (pdf1_ub*pdf2_u*mov2_u + pdf1_db*pdf2_d*mov2_d+ pdf1_cb*pdf2_c*mov2_c + pdf1_sb*pdf2_s*mov2_s + pdf1_bb*pdf2_b*mov2_b);
+  sigma_spin1_qbq    = sigmahat_spin1_qbq* (pdf1_ub*pdf2_u + pdf1_db*pdf2_d + pdf1_cb*pdf2_c + pdf1_sb*pdf2_s + pdf1_bb*pdf2_b);
+//  sigma_spin1_qq   += sigmahat_spin1_qq* (pdf_u*pdf_ub*Qu2 + pdf_d*pdf_db*Qd2 + pdf_c*pdf_cb*Qu2 + pdf_s*pdf_sb*Qd2 + pdf_b*pdf_bb*Qd2);
+  
+  
+  
+  sigmahat_spin0_gq = ColAvg_qg * Flux * Jacobian * ME0sq_gq(pIn[0],pIn[1],pOut[0],pOut[1]);
+  sigmahat_spin1_gq = ColAvg_qg * Flux * Jacobian * ME1sq_gq(pIn[0],pIn[1],pOut[0],pOut[1]);
+  sigma_spin0_gq    = sigmahat_spin0_gq* (pdf2_u*pdf1_g*mov2_u + pdf2_d*pdf1_g*mov2_d+ pdf2_c*pdf1_g*mov2_c + pdf2_s*pdf1_g*mov2_s + pdf2_b*pdf1_g*mov2_b);
+  sigma_spin1_gq    = sigmahat_spin1_gq* (pdf2_u*pdf1_g + pdf2_d*pdf1_g + pdf2_c*pdf1_g + pdf2_s*pdf1_g + pdf2_b*pdf1_g);
+  
+  sigmahat_spin0_qg = ColAvg_qg * Flux * Jacobian * ME0sq_gq(pIn[1],pIn[0],pOut[0],pOut[1]);
+  sigmahat_spin1_qg = ColAvg_qg * Flux * Jacobian * ME1sq_gq(pIn[1],pIn[0],pOut[0],pOut[1]);
+  sigma_spin0_qg    = sigmahat_spin0_qg* (pdf1_u*pdf2_g*mov2_u + pdf1_d*pdf2_g*mov2_d+ pdf1_c*pdf2_g*mov2_c + pdf1_s*pdf2_g*mov2_s + pdf1_b*pdf2_g*mov2_b);
+  sigma_spin1_qg    = sigmahat_spin1_qg* (pdf1_u*pdf2_g + pdf1_d*pdf2_g + pdf1_c*pdf2_g + pdf1_s*pdf2_g + pdf1_b*pdf2_g);
+  
+  
+  
+  sigmahat_spin0_qbg= ColAvg_qg * Flux * Jacobian * ME0sq_qbg(pIn[0],pIn[1],pOut[0],pOut[1]);
+  sigmahat_spin1_qbg= ColAvg_qg * Flux * Jacobian * ME1sq_qbg(pIn[0],pIn[1],pOut[0],pOut[1]);
+  sigma_spin0_qbg   = sigmahat_spin0_qbg* (pdf2_g*pdf1_ub*mov2_u + pdf2_g*pdf1_db*mov2_d+ pdf2_g*pdf1_cb*mov2_c + pdf2_g*pdf1_sb*mov2_s + pdf2_g*pdf1_bb*mov2_b);
+  sigma_spin1_qbg   = sigmahat_spin1_qbg* (pdf2_g*pdf1_ub + pdf2_g*pdf1_db + pdf2_g*pdf1_cb + pdf2_g*pdf1_sb + pdf2_g*pdf1_bb);
+ 
+  sigmahat_spin0_gqb= ColAvg_qg * Flux * Jacobian * ME0sq_qbg(pIn[1],pIn[0],pOut[0],pOut[1]);
+  sigmahat_spin1_gqb= ColAvg_qg * Flux * Jacobian * ME1sq_qbg(pIn[1],pIn[0],pOut[0],pOut[1]);
+  sigma_spin0_gqb   = sigmahat_spin0_gqb* (pdf1_g*pdf2_ub*mov2_u + pdf1_g*pdf2_db*mov2_d+ pdf1_g*pdf2_cb*mov2_c + pdf1_g*pdf2_sb*mov2_s + pdf1_g*pdf2_bb*mov2_b);
+  sigma_spin1_gqb   = sigmahat_spin1_gqb* (pdf1_g*pdf2_ub + pdf1_g*pdf2_db + pdf1_g*pdf2_cb + pdf1_g*pdf2_sb + pdf1_g*pdf2_bb);
+  
+  
 //printf(" ehat %e %e \n",CMSEnergy,q);
 //printf(" flux %e \n",Flux);
 //printf(" jaco %e \n",Jacobian);
@@ -252,39 +396,16 @@ void CrossSection(double x[DIMENSION], double *weight, double f[FUNCTIONS])
 //exit(0);
   // P_left( qbar(x1) ) * P_right( q(x2 )
 
-  iParton = 0;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf_g);
-  iParton = 1;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf_d);
-  iParton = 2;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf_u);
-  iParton = 3;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf_s);
-  iParton = 4;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf_c);
-  iParton = 5;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf_b);
-
-  iParton = -1;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf_db);
-  iParton = -2;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf_ub);
-  iParton = -3;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf_sb);
-  iParton = -4;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf_cb);
-  iParton = -5;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf_bb);
-
-  sigmahat_spin0_qq = ColAvg_qq * Flux * Jacobian * ME0sq(pIn[1],pIn[0],pOut[0],pOut[1]);
-  sigmahat_spin1_qq = ColAvg_qq * Flux * Jacobian * ME1sq(pIn[1],pIn[0],pOut[0],pOut[1]);
-  sigma_spin0_qq   += sigmahat_spin0_qq* (pdf_ub*pdf_u*mov2_u + pdf_db*pdf_d*mov2_d+ pdf_cb*pdf_c*mov2_c + pdf_sb*pdf_s*mov2_s + pdf_bb*pdf_b*mov2_b);
-  sigma_spin1_qq   += sigmahat_spin1_qq* (pdf_ub*pdf_u + pdf_db*pdf_d + pdf_cb*pdf_c + pdf_sb*pdf_s + pdf_bb*pdf_b);
-//  sigma_spin1_qq   += sigmahat_spin1_qq* (pdf_u*pdf_ub*Qu2 + pdf_d*pdf_db*Qd2 + pdf_c*pdf_cb*Qu2 + pdf_s*pdf_sb*Qd2 + pdf_b*pdf_bb*Qd2);
 
 
- f[0] = fbGeV2 * sigma_spin0_qq;
- f[1] = fbGeV2 * sigma_spin1_qq;
+ f[0] = fbGeV2 * (sigma_spin0_qqb+sigma_spin0_qbq);
+ f[1] = fbGeV2 * (sigma_spin1_qqb+sigma_spin1_qbq);
+
+ f[0] += fbGeV2 * (sigma_spin0_qg+sigma_spin0_gq);
+ f[1] += fbGeV2 * (sigma_spin1_qg+sigma_spin1_gq);
+
+ f[0] += fbGeV2 * (sigma_spin0_gqb+sigma_spin0_qbg);
+ f[1] += fbGeV2 * (sigma_spin1_gqb+sigma_spin1_qbg);
 
 
  int iBin1= WhichBin(1,pTg);
@@ -346,6 +467,12 @@ int main(int argc, char **argv)
   double reg[2*DIMENSION];   /* integration domain                           */
 
 
+   int iord=2;
+   double one=1.0;
+   double MZ=91.19*GeV, as_mz=0.13;
+   double m_c=(1.3)*GeV, m_b=(4.2)*GeV, m_t=172.0*GeV;
+   initalphasr0_(&iord, &one, &MZ, &as_mz, &m_c, &m_b, &m_t);
+ 
 
   //  initializing the integration range, always from 0.0 to 1.0
   for (i=0; i<DIMENSION; i++) {
@@ -354,7 +481,7 @@ int main(int argc, char **argv)
   }
 
   // setting parameters for vegas integrator
-  unsigned long ncall=10000000;
+  unsigned long ncall=100000;
 
 
   int init=0;
