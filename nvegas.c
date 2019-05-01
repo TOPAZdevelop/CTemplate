@@ -344,7 +344,7 @@ void vegas(double regn[], int ndim, void (*fxn)(double x[], double *wgt, double 
     }
     if (nprn & NPRN_SECRES) {
       for (i=1; i<functions; i++) {
-        printf("   %4d%s%14.7g+/-%9.2g  chi^2/IT n = %9.2g\n",
+        printf("   %4d%s%14.7g +/- %9.2g  chi^2/IT n = %9.2g\n",
                i,".additional integral= ",tgral[i],sd[i],chi2a[i]);
       }
     }

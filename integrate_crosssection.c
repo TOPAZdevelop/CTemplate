@@ -15,24 +15,89 @@
 
 
 #define DIMENSION 4
-
 #define FUNCTIONS 2
+
+
+#define NUMHIST 2
+#define NUMBINS 20
+
+
+// *******************************
+// select Process here: ProcDM or ProcZ
+// 
+#define SELECTPROCESS ProcZ
+// 
+// *******************************
+
+
+
 
 #ifndef max
 	#define max( a, b ) ( ((a) > (b)) ? (a) : (b) )
 #endif
 
-const double Pi=3.14159265359;
-      double alpha_s;
-const double alpha=0.00729927007299; // 0.0075624689028; //
-const double GeV=1.0;
 
-const double C_DMspin0=1.0;
+
+#ifndef sq
+	#define sq( a ) ( (((a)*(a))) )
+#endif
+
+
+#define GeV (1.0)
+#define ProcZ 0
+#define ProcDM 1
+
+#define Pi (3.14159265359)
+#define alpha (0.00729927007299)         // 0.0075624689028; //
+#define sw (0.48085340801537427)
+#define cw (0.87680100364906061)
+#define BrZee (0.033632)
+#define BrZnn (0.2000)
+#define BrZxx (1.0000)
+
+
+
+
+
+#if SELECTPROCESS == ProcZ
+
+const double Mass_DM = 91.1876*GeV;
+
+const double C_DMspin0 = 1e-18;
+const double vev = 1.0*GeV;
+
+const double C_DMspin1=0.21415570614803474;  // =sqrt(2 pi alpha )
+const double cfla_u = (sq(cw/sw*(+0.5) - sw/cw*(+1.0/6.0))  +  sq(-sw/cw*(+2.0/3.0))) * (BrZnn);  // = ( (I^Z_qL)^2 + (I^Z_qR)^2 ) * Br(Z-->xx)
+const double cfla_d = (sq(cw/sw*(-0.5) - sw/cw*(+1.0/6.0))  +  sq(-sw/cw*(-1.0/3.0))) * (BrZnn);  // = ( (I^Z_qL)^2 + (I^Z_qR)^2 ) * Br(Z-->xx)
+
+
+#elif SELECTPROCESS == ProcDM
+
+const double Mass_DM = 10.0*GeV;
+
+const double C_DMspin0 = 1.0;
+const double vev = 10.0*GeV;    // = Mass_DM
+
 const double C_DMspin1=0.1;
+const double cfla_u = 1.0;
+const double cfla_d = 1.0;
+
+#endif
+
+const double ColliderEnergy = 13000*GeV;
+const double pT_cut  = 20.0*GeV;
+const double yg_cut  = 5.0;
+double alpha_s;
 
 
-#define NUMHIST 2
-#define NUMBINS 20
+const int Select_qqb=1;
+const int Select_qbq=1;
+const int Select_qg =1;
+const int Select_gq =1;
+const int Select_qbg=1;
+const int Select_gqb=1;
+
+
 
 double Histogram_spin0[NUMHIST][NUMBINS];
 double Histogram_spin1[NUMHIST][NUMBINS];
@@ -106,7 +171,6 @@ double ME1sq_gq(double *p1,double *p2,double *p3,double *p4) // spin-1 matrix el
 }
 
 
-
 double ME0sq_gq(double *p1,double *p2,double *p3,double *p4) // spin-0 matrix element squared
 {
  double PreFactor = 4.0*(4.0*Pi*alpha_s)*C_DMspin0*C_DMspin0;
@@ -124,7 +188,6 @@ double ME0sq_gq(double *p1,double *p2,double *p3,double *p4) // spin-0 matrix el
 }
 
 
-
 double ME1sq_qbg(double *p1,double *p2,double *p3,double *p4) // spin-1 matrix element squared
 {
  double PreFactor = 8.0*(4.0*Pi*alpha_s)*C_DMspin1*C_DMspin1;
@@ -140,7 +203,6 @@ double ME1sq_qbg(double *p1,double *p2,double *p3,double *p4) // spin-1 matrix e
  return MEsq;
  
 }
-
 
 
 double ME0sq_qbg(double *p1,double *p2,double *p3,double *p4) // spin-0 matrix element squared
@@ -191,7 +253,7 @@ void CrossSection(double x[DIMENSION], double *weight, double f[FUNCTIONS])
 { 
 // declare variables   
   int NPart,iSet,iParton;
-  double x1,x2,q,Flux,pTg,yg,pTg_cut;
+  double x1,x2,q,Flux,pTg,yg,ylab;
   double Mass[2],pOut[2][4],pIn[2][4];
   double sigma_spin0_qqb,sigmahat_spin0_qqb;
   double sigma_spin1_qqb,sigmahat_spin1_qqb;
@@ -205,17 +267,16 @@ void CrossSection(double x[DIMENSION], double *weight, double f[FUNCTIONS])
   double sigma_spin1_gq,sigmahat_spin1_gq;
   double sigma_spin0_gqb,sigmahat_spin0_gqb;
   double sigma_spin1_gqb,sigmahat_spin1_gqb;
-  double Jacobian,shat,CMSEnergy,ColliderEnergy;
+  double Jacobian,shat,CMSEnergy;
   double pdf1_u,pdf1_d,pdf1_c,pdf1_s,pdf1_b,pdf1_g;
   double pdf1_ub,pdf1_db,pdf1_cb,pdf1_sb,pdf1_bb;
   double pdf2_u,pdf2_d,pdf2_c,pdf2_s,pdf2_b,pdf2_g;
   double pdf2_ub,pdf2_db,pdf2_cb,pdf2_sb,pdf2_bb;
-  double vev=1*GeV;
-  double mov2_u=((2e-3)*GeV/vev)*((2e-3)*GeV/vev);
-  double mov2_d=((5e-3)*GeV/vev)*((5e-3)*GeV/vev);
-  double mov2_c=((1.3)*GeV/vev)*((1.3)*GeV/vev);
-  double mov2_s=((95e-3)*GeV/vev)*((95e-3)*GeV/vev);
-  double mov2_b=((4.2)*GeV/vev)*((4.2)*GeV/vev);
+  double mov2_u=((2.2e-3)*GeV/vev)*((2.2e-3)*GeV/vev);
+  double mov2_d=((4.7e-3)*GeV/vev)*((4.7e-3)*GeV/vev);
+  double mov2_c=((1.27)*GeV/vev)*((1.27)*GeV/vev);
+  double mov2_s=((96e-3)*GeV/vev)*((96e-3)*GeV/vev);
+  double mov2_b=((4.18)*GeV/vev)*((4.18)*GeV/vev);
   double Qu2=(2.0/3.0)*(2.0/3.0);
   double Qd2=(1.0/3.0)*(1.0/3.0);
   const double PiWgt2 = 1.0/Pi;
@@ -223,19 +284,13 @@ void CrossSection(double x[DIMENSION], double *weight, double f[FUNCTIONS])
   const double ColAvg_qg = 1.0/3.0/8.0;
   const double fbGeV2 = 0.389379*1e12;
 
-//x[0]=0.15;
-//x[1]=0.76;
-//x[2]=0.47;
-//x[3]=0.22;
 
 // initialize variables 
   f[0] = 0.0;
   f[1] = 0.0;
-  ColliderEnergy = 13000*GeV;
   NPart=2;
-  Mass[0] = 10.0*GeV; // spin-0,1 DM
-  Mass[1] = 0.0*GeV; // gluon 
-  pTg_cut = 20.0*GeV;
+  Mass[0] = Mass_DM; // spin-0,1 DarkMatter
+  Mass[1] = 0.0*GeV;  // gluon 
   iSet=0;
   x1 = x[2];
   x2 = x[3];
@@ -243,9 +298,11 @@ void CrossSection(double x[DIMENSION], double *weight, double f[FUNCTIONS])
   shat = x1*x2*ColliderEnergy*ColliderEnergy;
   CMSEnergy = sqrt(shat);
   q = CMSEnergy; 
+//   q = Mass_DM; 
   Flux = 1.0/(2.0*shat);
+  alphas_(&q,&alpha_s);
 
-  if ( CMSEnergy < Mass[0]+Mass[1]+pTg_cut ){
+  if ( CMSEnergy < Mass[0]+Mass[1]+pT_cut ){
     return;
   };
 
@@ -264,12 +321,14 @@ void CrossSection(double x[DIMENSION], double *weight, double f[FUNCTIONS])
   
   pTg = sqrt(pOut[1][1]*pOut[1][1]+pOut[1][2]*pOut[1][2]);
   yg = 0.5*log((pOut[1][0]+pOut[1][3])/(pOut[1][0]-pOut[1][3]));
-  if ( pTg < pTg_cut ){
+  ylab = 0.5*log(x1/x2);
+  yg = yg + ylab;
+  
+  if ( pTg < pT_cut || abs(yg)>yg_cut ){
     return;
   };  
   
-  // check the generated momenta
-   
+// check the generated momenta   
 //   printf("x : %10.4f %10.4f \n",x[0],x[1]);;
 //   printf("p1: %10.4f %10.4f %10.4f %10.4f \n",pIn[0][0],pIn[0][1],pIn[0][2],pIn[0][3]);
 //   printf("p2: %10.4f %10.4f %10.4f %10.4f \n",pIn[0][0],pIn[0][1],pIn[0][2],pIn[0][3]);
@@ -343,44 +402,44 @@ void CrossSection(double x[DIMENSION], double *weight, double f[FUNCTIONS])
   Jacobian *=1.0/x1/x2;
 
   
-  alphas_(&q,&alpha_s);
 
+// q-qb
   sigmahat_spin0_qqb= ColAvg_qq * Flux * Jacobian * ME0sq_qqb(pIn[0],pIn[1],pOut[0],pOut[1]);
   sigmahat_spin1_qqb= ColAvg_qq * Flux * Jacobian * ME1sq_qqb(pIn[0],pIn[1],pOut[0],pOut[1]);
-  sigma_spin0_qqb   = sigmahat_spin0_qqb* (pdf1_u*pdf2_ub*mov2_u + pdf1_d*pdf2_db*mov2_d+ pdf1_c*pdf2_cb*mov2_c + pdf1_s*pdf2_sb*mov2_s + pdf1_b*pdf2_bb*mov2_b);
-  sigma_spin1_qqb   = sigmahat_spin1_qqb* (pdf1_u*pdf2_ub + pdf1_d*pdf2_db + pdf1_c*pdf2_cb + pdf1_s*pdf2_sb + pdf1_b*pdf2_bb);
+  sigma_spin0_qqb   = sigmahat_spin0_qqb* (pdf1_u*pdf2_ub*mov2_u + pdf1_d*pdf2_db*mov2_d + pdf1_c*pdf2_cb*mov2_c + pdf1_s*pdf2_sb*mov2_s + pdf1_b*pdf2_bb*mov2_b);
+  sigma_spin1_qqb   = sigmahat_spin1_qqb* (pdf1_u*pdf2_ub*cfla_u + pdf1_d*pdf2_db*cfla_d + pdf1_c*pdf2_cb*cfla_u + pdf1_s*pdf2_sb*cfla_d + pdf1_b*pdf2_bb*cfla_d);
 //  sigma_spin1_qq    = sigmahat_spin1_qq* (pdf_u*pdf_ub*Qu2 + pdf_d*pdf_db*Qd2 + pdf_c*pdf_cb*Qu2 + pdf_s*pdf_sb*Qd2 + pdf_b*pdf_bb*Qd2);
 
-
+// qb-q
   sigmahat_spin0_qbq = ColAvg_qq * Flux * Jacobian * ME0sq_qqb(pIn[1],pIn[0],pOut[0],pOut[1]);
   sigmahat_spin1_qbq = ColAvg_qq * Flux * Jacobian * ME1sq_qqb(pIn[1],pIn[0],pOut[0],pOut[1]);
   sigma_spin0_qbq    = sigmahat_spin0_qbq* (pdf1_ub*pdf2_u*mov2_u + pdf1_db*pdf2_d*mov2_d+ pdf1_cb*pdf2_c*mov2_c + pdf1_sb*pdf2_s*mov2_s + pdf1_bb*pdf2_b*mov2_b);
-  sigma_spin1_qbq    = sigmahat_spin1_qbq* (pdf1_ub*pdf2_u + pdf1_db*pdf2_d + pdf1_cb*pdf2_c + pdf1_sb*pdf2_s + pdf1_bb*pdf2_b);
+  sigma_spin1_qbq    = sigmahat_spin1_qbq* (pdf1_ub*pdf2_u*cfla_u + pdf1_db*pdf2_d*cfla_d+ pdf1_cb*pdf2_c*cfla_u + pdf1_sb*pdf2_s*cfla_d + pdf1_bb*pdf2_b*cfla_d);
 //  sigma_spin1_qq   += sigmahat_spin1_qq* (pdf_u*pdf_ub*Qu2 + pdf_d*pdf_db*Qd2 + pdf_c*pdf_cb*Qu2 + pdf_s*pdf_sb*Qd2 + pdf_b*pdf_bb*Qd2);
   
-  
-  
+// g-q  
   sigmahat_spin0_gq = ColAvg_qg * Flux * Jacobian * ME0sq_gq(pIn[0],pIn[1],pOut[0],pOut[1]);
   sigmahat_spin1_gq = ColAvg_qg * Flux * Jacobian * ME1sq_gq(pIn[0],pIn[1],pOut[0],pOut[1]);
   sigma_spin0_gq    = sigmahat_spin0_gq* (pdf2_u*pdf1_g*mov2_u + pdf2_d*pdf1_g*mov2_d+ pdf2_c*pdf1_g*mov2_c + pdf2_s*pdf1_g*mov2_s + pdf2_b*pdf1_g*mov2_b);
-  sigma_spin1_gq    = sigmahat_spin1_gq* (pdf2_u*pdf1_g + pdf2_d*pdf1_g + pdf2_c*pdf1_g + pdf2_s*pdf1_g + pdf2_b*pdf1_g);
-  
+  sigma_spin1_gq    = sigmahat_spin1_gq* (pdf2_u*pdf1_g*cfla_u + pdf2_d*pdf1_g*cfla_d+ pdf2_c*pdf1_g*cfla_u + pdf2_s*pdf1_g*cfla_d + pdf2_b*pdf1_g*cfla_d);
+
+// q-g    
   sigmahat_spin0_qg = ColAvg_qg * Flux * Jacobian * ME0sq_gq(pIn[1],pIn[0],pOut[0],pOut[1]);
   sigmahat_spin1_qg = ColAvg_qg * Flux * Jacobian * ME1sq_gq(pIn[1],pIn[0],pOut[0],pOut[1]);
   sigma_spin0_qg    = sigmahat_spin0_qg* (pdf1_u*pdf2_g*mov2_u + pdf1_d*pdf2_g*mov2_d+ pdf1_c*pdf2_g*mov2_c + pdf1_s*pdf2_g*mov2_s + pdf1_b*pdf2_g*mov2_b);
-  sigma_spin1_qg    = sigmahat_spin1_qg* (pdf1_u*pdf2_g + pdf1_d*pdf2_g + pdf1_c*pdf2_g + pdf1_s*pdf2_g + pdf1_b*pdf2_g);
+  sigma_spin1_qg    = sigmahat_spin1_qg* (pdf1_u*pdf2_g*cfla_u + pdf1_d*pdf2_g*cfla_d+ pdf1_c*pdf2_g*cfla_u + pdf1_s*pdf2_g*cfla_d + pdf1_b*pdf2_g*cfla_d);
   
-  
-  
+// qb-g
   sigmahat_spin0_qbg= ColAvg_qg * Flux * Jacobian * ME0sq_qbg(pIn[0],pIn[1],pOut[0],pOut[1]);
   sigmahat_spin1_qbg= ColAvg_qg * Flux * Jacobian * ME1sq_qbg(pIn[0],pIn[1],pOut[0],pOut[1]);
   sigma_spin0_qbg   = sigmahat_spin0_qbg* (pdf2_g*pdf1_ub*mov2_u + pdf2_g*pdf1_db*mov2_d+ pdf2_g*pdf1_cb*mov2_c + pdf2_g*pdf1_sb*mov2_s + pdf2_g*pdf1_bb*mov2_b);
-  sigma_spin1_qbg   = sigmahat_spin1_qbg* (pdf2_g*pdf1_ub + pdf2_g*pdf1_db + pdf2_g*pdf1_cb + pdf2_g*pdf1_sb + pdf2_g*pdf1_bb);
- 
+  sigma_spin1_qbg   = sigmahat_spin1_qbg* (pdf2_g*pdf1_ub*cfla_u + pdf2_g*pdf1_db*cfla_d+ pdf2_g*pdf1_cb*cfla_u + pdf2_g*pdf1_sb*cfla_d + pdf2_g*pdf1_bb*cfla_d);
+
+// g-qb
   sigmahat_spin0_gqb= ColAvg_qg * Flux * Jacobian * ME0sq_qbg(pIn[1],pIn[0],pOut[0],pOut[1]);
   sigmahat_spin1_gqb= ColAvg_qg * Flux * Jacobian * ME1sq_qbg(pIn[1],pIn[0],pOut[0],pOut[1]);
   sigma_spin0_gqb   = sigmahat_spin0_gqb* (pdf1_g*pdf2_ub*mov2_u + pdf1_g*pdf2_db*mov2_d+ pdf1_g*pdf2_cb*mov2_c + pdf1_g*pdf2_sb*mov2_s + pdf1_g*pdf2_bb*mov2_b);
-  sigma_spin1_gqb   = sigmahat_spin1_gqb* (pdf1_g*pdf2_ub + pdf1_g*pdf2_db + pdf1_g*pdf2_cb + pdf1_g*pdf2_sb + pdf1_g*pdf2_bb);
+  sigma_spin1_gqb   = sigmahat_spin1_gqb* (pdf1_g*pdf2_ub*cfla_u + pdf1_g*pdf2_db*cfla_d+ pdf1_g*pdf2_cb*cfla_u + pdf1_g*pdf2_sb*cfla_d + pdf1_g*pdf2_bb*cfla_d);
   
   
 //printf(" ehat %e %e \n",CMSEnergy,q);
@@ -398,14 +457,14 @@ void CrossSection(double x[DIMENSION], double *weight, double f[FUNCTIONS])
 
 
 
- f[0] = fbGeV2 * (sigma_spin0_qqb+sigma_spin0_qbq);
- f[1] = fbGeV2 * (sigma_spin1_qqb+sigma_spin1_qbq);
+ f[0]  = fbGeV2 * (sigma_spin0_qqb*Select_qqb + sigma_spin0_qbq*Select_qbq);
+ f[1]  = fbGeV2 * (sigma_spin1_qqb*Select_qqb + sigma_spin1_qbq*Select_qbq);
 
- f[0] += fbGeV2 * (sigma_spin0_qg+sigma_spin0_gq);
- f[1] += fbGeV2 * (sigma_spin1_qg+sigma_spin1_gq);
+ f[0] += fbGeV2 * (sigma_spin0_qg*Select_qg + sigma_spin0_gq*Select_gq);
+ f[1] += fbGeV2 * (sigma_spin1_qg*Select_qg + sigma_spin1_gq*Select_gq);
 
- f[0] += fbGeV2 * (sigma_spin0_gqb+sigma_spin0_qbg);
- f[1] += fbGeV2 * (sigma_spin1_gqb+sigma_spin1_qbg);
+ f[0] += fbGeV2 * (sigma_spin0_gqb*Select_gqb + sigma_spin0_qbg*Select_qbg);
+ f[1] += fbGeV2 * (sigma_spin1_gqb*Select_gqb + sigma_spin1_qbg*Select_qbg);
 
 
  int iBin1= WhichBin(1,pTg);
@@ -442,8 +501,12 @@ void CrossSection(double x[DIMENSION], double *weight, double f[FUNCTIONS])
 //  
 //  int set=4;
 //  mgwrapper(&set,MomExtMG,&MGRes);
+// //  printf("MY Result %f \n",sigmahat_spin1_qqb*cfla_u/(Flux * Jacobian));
+//  printf("MY Result %f \n",sigmahat_spin1_gqb*cfla_d/(Flux * Jacobian));
 //  printf("MG Result %f \n",MGRes);
- 
+// //  printf("ratio     %f \n",MGRes/(sigmahat_spin1_qqb*cfla_u/(Flux * Jacobian)));
+//  printf("ratio     %f \n",MGRes/(sigmahat_spin1_gqb*cfla_d/(Flux * Jacobian)));
+//  exit;
 
 
   return;
@@ -469,8 +532,8 @@ int main(int argc, char **argv)
 
    int iord=2;
    double one=1.0;
-   double MZ=91.19*GeV, as_mz=0.13;
-   double m_c=(1.3)*GeV, m_b=(4.2)*GeV, m_t=172.0*GeV;
+   double MZ=91.1876*GeV, as_mz=0.1181;
+   double m_c=(1.27)*GeV, m_b=(4.18)*GeV, m_t=173.0*GeV;
    initalphasr0_(&iord, &one, &MZ, &as_mz, &m_c, &m_b, &m_t);
  
 
@@ -498,12 +561,20 @@ int main(int argc, char **argv)
 
   init=1;
   itmx=10;
+  ncall=500000;
   // calling vegas integrator
   vegas(reg, DIMENSION, CrossSection, init, ncall, itmx,0x0001 | 0x0002 | 0x0004, FUNCTIONS, 0, 1, estim, std_dev, chi2a);
   
 
+  
+  
+  
+  
+  
 
   double LowVal,BinSize;
+  FILE *fp;
+  fp=fopen("Histo.dat", "w");
 
   for (j=0; j<NUMHIST; j++) {
    for (i=0; i<NUMBINS; i++) { 
@@ -511,21 +582,22 @@ int main(int argc, char **argv)
 	    case 0: LowVal=20.0*GeV; BinSize=10*GeV; break;  // pT_glu
 	    case 1: LowVal=-5.0; BinSize=0.5;        break;  // y_glu
 	  };
-      printf("0  %2i  %6.2f   %e \n",j+1,(i)*BinSize+LowVal,Histogram_spin0[j][i]/itmx);
+      fprintf(fp,"0  %2i  %6.2f   %e \n",j+1,(i)*BinSize+LowVal,Histogram_spin0[j][i]/itmx);
    };
   };
-  printf("\n\n");
+  fprintf(fp,"\n\n");
   for (j=0; j<NUMHIST; j++) {
    for (i=0; i<NUMBINS; i++) { 
 	  switch(j) {
 	    case 0: LowVal=20.0*GeV; BinSize=10*GeV; break;  // pT_glu
 	    case 1: LowVal=-5.0; BinSize=0.5;        break;  // y_glu
 	  };
-      printf("1  %2i  %6.2f   %e \n",j+1,(i)*BinSize+LowVal,Histogram_spin1[j][i]/itmx);
+      fprintf(fp,"1  %2i  %6.2f   %e \n",j+1,(i)*BinSize+LowVal,Histogram_spin1[j][i]/itmx);
    };
   };
 	
 
+  printf("\n\n");
   return(0);
 }
 

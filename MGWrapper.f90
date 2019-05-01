@@ -13,7 +13,9 @@ real(C_DOUBLE) :: Mom(1:N,1:4),Res,MGWrapper
 
 
       call coupsm(0)
-      call SEMEP_TAPTAM(Mom,Res)
+!       call SEMEP_TAPTAM(Mom,Res)
+!       call SUUB_ZG(Mom,Res)
+      call SGDB_ZDB(Mom,Res)
       
 
 MGWrapper=1.0
