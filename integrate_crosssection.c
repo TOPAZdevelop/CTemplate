@@ -25,7 +25,7 @@
 // *******************************
 // select Process here: ProcDM or ProcZ
 // 
-#define SELECTPROCESS ProcZ
+#define SELECTPROCESS ProcDM
 // 
 // *******************************
 
@@ -61,7 +61,7 @@
 
 #if SELECTPROCESS == ProcZ
 
-const double Mass_DM = 91.1876*GeV;
+double Mass_DM = 91.1876*GeV;
 
 const double C_DMspin0 = 1e-18;
 const double vev = 1.0*GeV;
@@ -73,7 +73,7 @@ const double cfla_d = (sq(cw/sw*(-0.5) - sw/cw*(+1.0/6.0))  +  sq(-sw/cw*(-1.0/3
 
 #elif SELECTPROCESS == ProcDM
 
-const double Mass_DM = 10.0*GeV;
+double Mass_DM = 10.0*GeV;
 
 const double C_DMspin0 = 1.0;
 const double vev = 10.0*GeV;    // = Mass_DM
@@ -86,7 +86,7 @@ const double cfla_d = 1.0;
 
 const double ColliderEnergy = 13000*GeV;
 const double pT_cut  = 20.0*GeV;
-const double yg_cut  = 5.0;
+const double yg_cut  = 55.0;
 double alpha_s;
 
 
@@ -521,7 +521,7 @@ void CrossSection(double x[DIMENSION], double *weight, double f[FUNCTIONS])
 
 
 // MAIN PROGRAM
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 { /* declare variables */
   int i,j;
   double estim[FUNCTIONS];   /* estimators for integrals                     */
@@ -529,13 +529,18 @@ int main(int argc, char **argv)
   double chi2a[FUNCTIONS];   /* chi^2/n                                      */
   double reg[2*DIMENSION];   /* integration domain                           */
 
-
-   int iord=2;
-   double one=1.0;
-   double MZ=91.1876*GeV, as_mz=0.1181;
-   double m_c=(1.27)*GeV, m_b=(4.18)*GeV, m_t=173.0*GeV;
+  int iord=2;
+  double one=1.0;
+  double MZ=91.1876*GeV, as_mz=0.1181;
+  double m_c=(1.27)*GeV, m_b=(4.18)*GeV, m_t=173.0*GeV;
    initalphasr0_(&iord, &one, &MZ, &as_mz, &m_c, &m_b, &m_t);
- 
+
+
+#if SELECTPROCESS == ProcDM 
+  if( argc == 2 ){ Mass_DM = atof(argv[1]); };
+  printf("\n\n m_DM = %f GeV \n\n",Mass_DM);
+#endif 
+  
 
   //  initializing the integration range, always from 0.0 to 1.0
   for (i=0; i<DIMENSION; i++) {
@@ -544,11 +549,11 @@ int main(int argc, char **argv)
   }
 
   // setting parameters for vegas integrator
-  unsigned long ncall=100000;
+  unsigned long ncall=50000;
 
 
   int init=0;
-  int itmx=5;
+  int itmx=3;
   // calling vegas integrator
   vegas(reg, DIMENSION, CrossSection, init, ncall/2, itmx,0x0001 | 0x0002 | 0x0004, FUNCTIONS, 0, 1, estim, std_dev, chi2a);
    
@@ -561,7 +566,7 @@ int main(int argc, char **argv)
 
   init=1;
   itmx=10;
-  ncall=500000;
+  ncall=100000;
   // calling vegas integrator
   vegas(reg, DIMENSION, CrossSection, init, ncall, itmx,0x0001 | 0x0002 | 0x0004, FUNCTIONS, 0, 1, estim, std_dev, chi2a);
   
