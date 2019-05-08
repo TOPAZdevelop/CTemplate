@@ -40,23 +40,25 @@ int main(int argc, char *argv[])
   
   for(int count = 1; count <= 100; ++count){
   
-    x[0]=(rand() % RAND_MAX) / (double)RAND_MAX;
-    x[1]=(rand() % RAND_MAX) / (double)RAND_MAX;
-    x[2]=(rand() % RAND_MAX) / (double)RAND_MAX;
-    x[3]=(rand() % RAND_MAX) / (double)RAND_MAX;
-    x[4]=(rand() % RAND_MAX) / (double)RAND_MAX;   
-     
-     
-//  generate regular phase space
+//     //generate regular phase space
+//     x[0]=(rand() % RAND_MAX) / (double)RAND_MAX;
+//     x[1]=(rand() % RAND_MAX) / (double)RAND_MAX;
+//     x[2]=(rand() % RAND_MAX) / (double)RAND_MAX;
+//     x[3]=(rand() % RAND_MAX) / (double)RAND_MAX;
+//     x[4]=(rand() % RAND_MAX) / (double)RAND_MAX;       
 //     genps_(&NPart, &CMSEnergy, x, Masses, pOut, &Jacobian );
 
+    
+    
 //  generate singular phase space:  
     //  p5||p1
     int col1=1 -1;
     int col2=5 -1;
+    
 //     //  p5||p2   
 //     int col1=1 -1;
 //     int col2=5 -1;
+    
 //     //  p5 soft
 //     int col1=5 -1;
 //     int col2=5 -1;
