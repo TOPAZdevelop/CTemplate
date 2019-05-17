@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "vegas.h"
+#include "genps.h"
 
 
 #define DIMENSION 4
@@ -73,10 +74,10 @@ const double cfla_d = (sq(cw/sw*(-0.5) - sw/cw*(+1.0/6.0))  +  sq(-sw/cw*(-1.0/3
 
 #elif SELECTPROCESS == ProcDM
 
-double Mass_DM = 10.0*GeV;
+double Mass_DM   = 100.0*GeV;
+double vev = 100.0*GeV;    // = Mass_DM
 
 const double C_DMspin0 = 1.0;
-const double vev = 10.0*GeV;    // = Mass_DM
 
 const double C_DMspin1=0.1;
 const double cfla_u = 1.0;
@@ -537,7 +538,7 @@ int main(int argc, char *argv[])
 
 
 #if SELECTPROCESS == ProcDM 
-  if( argc == 2 ){ Mass_DM = atof(argv[1]); };
+  if( argc == 2 ){ Mass_DM = atof(argv[1]); vev = Mass_DM; };
   printf("\n\n m_DM = %f GeV \n\n",Mass_DM);
 #endif 
   
