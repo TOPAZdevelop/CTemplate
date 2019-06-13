@@ -580,7 +580,7 @@ int main(int argc, char *argv[])
 
   double LowVal,BinSize;
   FILE *fp;
-  fp=fopen("Histo.dat", "w");
+  fp=fopen("data/Histo.dat", "w");
 
   for (j=0; j<NUMHIST; j++) {
    for (i=0; i<NUMBINS; i++) { 
