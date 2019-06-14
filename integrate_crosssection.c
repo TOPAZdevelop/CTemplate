@@ -15,6 +15,10 @@
 #include "genps.h"
 
 
+extern void alphas_(double*, double*);
+extern void getonepdf_(int*, double*, double*, int*, double*);
+extern void initalphasr0_(int*, double*, double*, double*, double*, double*, double* );
+
 #define DIMENSION 4
 #define FUNCTIONS 2
 
@@ -37,8 +41,6 @@
 	#define max( a, b ) ( ((a) > (b)) ? (a) : (b) )
 #endif
 
-
-
 #ifndef sq
 	#define sq( a ) ( (((a)*(a))) )
 #endif
@@ -49,7 +51,7 @@
 #define ProcDM 1
 
 #define Pi (3.14159265359)
-#define alpha (0.00729927007299)         // 0.0075624689028; //
+#define alpha (0.00729927007299) 
 #define sw (0.48085340801537427)
 #define cw (0.87680100364906061)
 #define BrZee (0.033632)
@@ -254,7 +256,7 @@ void CrossSection(double x[DIMENSION], double *weight, double f[FUNCTIONS])
 { 
 // declare variables   
   int NPart,iSet,iParton;
-  double x1,x2,q,Flux,pTg,yg,ylab;
+  double x1,x2,q,mur,muf,Flux,pTg,yg,ylab;
   double Mass[2],pOut[2][4],pIn[2][4];
   double sigma_spin0_qqb,sigmahat_spin0_qqb;
   double sigma_spin1_qqb,sigmahat_spin1_qqb;
@@ -298,10 +300,11 @@ void CrossSection(double x[DIMENSION], double *weight, double f[FUNCTIONS])
 
   shat = x1*x2*ColliderEnergy*ColliderEnergy;
   CMSEnergy = sqrt(shat);
-  q = CMSEnergy; 
-//   q = Mass_DM; 
+  q = CMSEnergy;
+  mur = q*1.0;
+  muf = q*1.0;
   Flux = 1.0/(2.0*shat);
-  alphas_(&q,&alpha_s);
+  alphas_(&mur,&alpha_s);
 
   if ( CMSEnergy < Mass[0]+Mass[1]+pT_cut ){
     return;
@@ -353,52 +356,52 @@ void CrossSection(double x[DIMENSION], double *weight, double f[FUNCTIONS])
   // P_left( q(x1) ) * P_right( qbar(x2 )
 
   iParton = 0;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_g);
+  getonepdf_(&iSet,&x1,&muf,&iParton,&pdf1_g);
   iParton = 1;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_d);
+  getonepdf_(&iSet,&x1,&muf,&iParton,&pdf1_d);
   iParton = 2;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_u);
+  getonepdf_(&iSet,&x1,&muf,&iParton,&pdf1_u);
   iParton = 3;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_s);
+  getonepdf_(&iSet,&x1,&muf,&iParton,&pdf1_s);
   iParton = 4;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_c);
+  getonepdf_(&iSet,&x1,&muf,&iParton,&pdf1_c);
   iParton = 5;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_b);
+  getonepdf_(&iSet,&x1,&muf,&iParton,&pdf1_b);
 
   iParton = -1;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_db);
+  getonepdf_(&iSet,&x1,&muf,&iParton,&pdf1_db);
   iParton = -2;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_ub);
+  getonepdf_(&iSet,&x1,&muf,&iParton,&pdf1_ub);
   iParton = -3;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_sb);
+  getonepdf_(&iSet,&x1,&muf,&iParton,&pdf1_sb);
   iParton = -4;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_cb);
+  getonepdf_(&iSet,&x1,&muf,&iParton,&pdf1_cb);
   iParton = -5;
-  getonepdf_(&iSet,&x1,&q,&iParton,&pdf1_bb);    
+  getonepdf_(&iSet,&x1,&muf,&iParton,&pdf1_bb);    
   
   iParton = -1;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_db);
+  getonepdf_(&iSet,&x2,&muf,&iParton,&pdf2_db);
   iParton = -2;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_ub);
+  getonepdf_(&iSet,&x2,&muf,&iParton,&pdf2_ub);
   iParton = -3;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_sb);
+  getonepdf_(&iSet,&x2,&muf,&iParton,&pdf2_sb);
   iParton = -4;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_cb);
+  getonepdf_(&iSet,&x2,&muf,&iParton,&pdf2_cb);
   iParton = -5;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_bb);
+  getonepdf_(&iSet,&x2,&muf,&iParton,&pdf2_bb);
 
   iParton = 0;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_g);
+  getonepdf_(&iSet,&x2,&muf,&iParton,&pdf2_g);
   iParton = 1;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_d);
+  getonepdf_(&iSet,&x2,&muf,&iParton,&pdf2_d);
   iParton = 2;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_u);
+  getonepdf_(&iSet,&x2,&muf,&iParton,&pdf2_u);
   iParton = 3;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_s);
+  getonepdf_(&iSet,&x2,&muf,&iParton,&pdf2_s);
   iParton = 4;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_c);
+  getonepdf_(&iSet,&x2,&muf,&iParton,&pdf2_c);
   iParton = 5;
-  getonepdf_(&iSet,&x2,&q,&iParton,&pdf2_b);
+  getonepdf_(&iSet,&x2,&muf,&iParton,&pdf2_b);
 
   Jacobian *=1.0/x1/x2;
 
@@ -534,7 +537,8 @@ int main(int argc, char *argv[])
   double one=1.0;
   double MZ=91.1876*GeV, as_mz=0.1181;
   double m_c=(1.27)*GeV, m_b=(4.18)*GeV, m_t=173.0*GeV;
-   initalphasr0_(&iord, &one, &MZ, &as_mz, &m_c, &m_b, &m_t);
+  
+  initalphasr0_(&iord, &one, &MZ, &as_mz, &m_c, &m_b, &m_t);
 
 
 #if SELECTPROCESS == ProcDM 
@@ -550,13 +554,13 @@ int main(int argc, char *argv[])
   }
 
   // setting parameters for vegas integrator
-  unsigned long ncall=50000;
+  unsigned long ncall=500000;
 
 
   int init=0;
   int itmx=3;
   // calling vegas integrator
-  vegas(reg, DIMENSION, CrossSection, init, ncall/2, itmx,0x0001 | 0x0002 | 0x0004, FUNCTIONS, 0, 1, estim, std_dev, chi2a);
+  vegas(reg, DIMENSION, CrossSection, init, ncall, itmx,0x0001 | 0x0002 | 0x0004, FUNCTIONS, 0, 1, estim, std_dev, chi2a);
    
   for (j=0; j<NUMHIST; j++) {
    for (i=0; i<NUMBINS; i++) { 
@@ -566,8 +570,8 @@ int main(int argc, char *argv[])
   };
 
   init=1;
-  itmx=10;
-  ncall=100000;
+  itmx=5;
+  ncall=1000000;
   // calling vegas integrator
   vegas(reg, DIMENSION, CrossSection, init, ncall, itmx,0x0001 | 0x0002 | 0x0004, FUNCTIONS, 0, 1, estim, std_dev, chi2a);
   
