@@ -140,8 +140,8 @@ C      IVFNS = 1                 ! variable flavour-number scheme (VFNS)
       MT2 = MT**2               ! mu_f^2 for top threshold
       LOGFR = LOG(FR2)          ! log of ratio of mu_f^2 to mu_r^2
       M20 = R20 * FR2           ! input factorisation scale
+ 
 
-*
 * ..Stop some nonsense
 *
       IF ( (IVFNS .EQ. 0) .AND. (NFF .LT. 3) ) THEN
@@ -224,6 +224,7 @@ C----------------------------------------------------------------------
           R20 = M20 * R2/M2
           ASI = AS0
           ASF = AS (R2, R20, AS0, NF)
+                   
 *
        ELSE
 *

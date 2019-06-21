@@ -11,6 +11,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "vegas.h"
 #include "genps.h"
 
@@ -18,6 +19,7 @@
 extern void alphas_(double*, double*);
 extern void getonepdf_(int*, double*, double*, int*, double*);
 extern void initalphasr0_(int*, double*, double*, double*, double*, double*, double* );
+extern void initalphas_(int*, double*, double*, double*, double*, double*, double* );
 
 #define DIMENSION 4
 #define FUNCTIONS 2
@@ -79,9 +81,9 @@ const double cfla_d = (sq(cw/sw*(-0.5) - sw/cw*(+1.0/6.0))  +  sq(-sw/cw*(-1.0/3
 double Mass_DM   = 100.0*GeV;
 double vev = 100.0*GeV;    // = Mass_DM
 
-const double C_DMspin0 = 1.0;
+double C_DMspin0 = 0.1;
 
-const double C_DMspin1=0.1;
+double C_DMspin1=0.1;
 const double cfla_u = 1.0;
 const double cfla_d = 1.0;
 
@@ -116,6 +118,16 @@ double Dot(double *pa,double *pb) // Minkowski dot product
 //----------------------------------------------------------------------------------
 
 
+char* concat(const char *s1, const char *s2)
+{
+    char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
+    // in real code you would check for errors in malloc here
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
+}
+
+//----------------------------------------------------------------------------------
 
 
 
@@ -536,16 +548,29 @@ int main(int argc, char *argv[])
   int iord=2;
   double one=1.0;
   double MZ=91.1876*GeV, as_mz=0.1181;
-  double m_c=(1.27)*GeV, m_b=(4.18)*GeV, m_t=173.0*GeV;
+  double m_c=(1.27)*GeV, m_b=(4.18)*GeV, m_t=173.21*GeV;
   
   initalphasr0_(&iord, &one, &MZ, &as_mz, &m_c, &m_b, &m_t);
 
 
 #if SELECTPROCESS == ProcDM 
   if( argc == 2 ){ Mass_DM = atof(argv[1]); vev = Mass_DM; };
+  if( argc == 3 ){ Mass_DM = atof(argv[1]); vev = Mass_DM; C_DMspin0 = atof(argv[2]); C_DMspin1 = C_DMspin0;  };
   printf("\n\n m_DM = %f GeV \n\n",Mass_DM);
+  printf(" c_DM_spin0 = %f \n\n",C_DMspin0);
+  printf(" c_DM_spin1 = %f \n\n",C_DMspin1);
 #endif 
-  
+
+  char* filename;
+  if( argc >= 3 ){
+    filename = concat("./data/Histo_", argv[1]);
+    filename = concat(filename, "_");
+    filename = concat(filename, argv[2]);
+    filename = concat(filename, ".dat");}
+  else{
+    filename = "./data/Histo.dat";
+  };
+  printf(" output file = %s \n\n",filename);  
 
   //  initializing the integration range, always from 0.0 to 1.0
   for (i=0; i<DIMENSION; i++) {
@@ -584,7 +609,14 @@ int main(int argc, char *argv[])
 
   double LowVal,BinSize;
   FILE *fp;
-  fp=fopen("data/Histo.dat", "w");
+  fp=fopen(filename, "w");
+
+  fprintf(fp,"\n sigmatot(spin-0) = %e \n",estim[0]);
+  fprintf(fp," sigmaerr(spin-0) = %e \n",std_dev[0]);
+  fprintf(fp," sigmachi(spin-0) = %e \n\n",chi2a[0]);
+  fprintf(fp," sigmatot(spin-1) = %e \n",estim[1]);
+  fprintf(fp," sigmaerr(spin-1) = %e \n",std_dev[1]);
+  fprintf(fp," sigmachi(spin-1) = %e \n\n",chi2a[1]);
 
   for (j=0; j<NUMHIST; j++) {
    for (i=0; i<NUMBINS; i++) { 
